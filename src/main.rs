@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{BTreeMap, HashMap},
     fmt::{self, Display, Formatter},
     iter::{once, repeat},
 };
@@ -160,12 +160,21 @@ impl Alg {
         };
 
         // Merge coset and duplicate, and shift all labels to be consecutive
-        let mut translation = HashMap::new();
-        let mut substitute = |c| {
+        let mut translation = self
+            .rels
+            .iter()
+            .flat_map(|rel| rel.rows.iter().flatten())
+            .flatten()
+            .copied()
+            .map(|c| (if c == duplicate { coset } else { c }, 0))
+            .collect::<BTreeMap<_, _>>();
+        translation
+            .iter_mut()
+            .zip(0usize..)
+            .for_each(|((_, value), next)| *value = next);
+        let substitute = |c| {
             let c = if c == duplicate { coset } else { c };
-
-            let next = translation.len();
-            *translation.entry(c).or_insert(next)
+            *translation.get(&c).unwrap()
         };
 
         for rel in &mut self.rels {
