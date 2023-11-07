@@ -159,6 +159,8 @@ impl Alg {
             None => return false,
         };
 
+        println!("Found equivalence {coset} = {duplicate}");
+
         // Merge coset and duplicate, and shift all labels to be consecutive
         let mut translation = self
             .rels
